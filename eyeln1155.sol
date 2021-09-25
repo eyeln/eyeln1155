@@ -402,86 +402,96 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
     // Used as the URI for all token types by relying on ID substitution, e.g. https://token-cdn-domain/{id}.json
     string private _uri;
+    
+    // ===================================================================================================================
+    // ===================================================================================================================
+    // EYELN Start
+    // ===================================================================================================================
+    // ===================================================================================================================
 
-	// set contract owner n shit
+	// set contract owner n 
     address private contractOwner;
-	// set counter to shit 0
+	// set counter to  0
     uint256 public tokenCount = 0;
-	// yield info shit
-	struct YieldInfo {
-        uint256 date;
-        uint256 eyelnAmt;
-        bool canClaim;
-    }
-	// mapp yield info shit
-    mapping(uint256 => YieldInfo) public yield;
-    // market info Shit
-    struct MarketInfo {
-        address owner;
+	// yield info 
+	struct Info {
+	    address owner;
         bool canTrade;
         uint256 weiAmt;
         uint256 weiFee;
+        uint256 date;
+        uint256 level;
+        bool canClaim;
     }
-    mapping (uint256 => MarketInfo) public market;
+	// mapp yield info 
+    mapping(uint256 => Info) public eyeln;
     /**
      * @dev See {_setURI}.
-		 * construct Shit
+		 * construct 
      */
     constructor (string memory uri_) {
-		// set contract shitty owner
+		// set contract ty owner
         contractOwner = msg.sender;
-        // mint fungible tokens for contract shit
-        _mint(address(this), 0, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff - 640564039457584007913129639935, "");   
-		// mint me some tokens shit
-	   // _mint(msg.sender, 0, 640564039457584007913129639935, "");   
+        // mint fungible tokens for contract 
+        _mint(address(this), 0, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "");
+        _mint(msg.sender, 0, 10, "");
         _setURI(uri_);
     }
 
-	// claim yield shit
-	function claim(uint256 _tokenId) public {
+	// claim yield
+	function claimEyeln(uint256 _tokenId) public {
 	    require(_tokenId > 0, "can only claim NFT");
 	    require(balanceOf(msg.sender, _tokenId) == 1, "only owner can claim");
-		require(block.timestamp > yield[_tokenId].date, "too early to claim");
-		require(yield[_tokenId].canClaim == true, "already claimed");
-		yield[_tokenId].canClaim = false;
+		require(block.timestamp > eyeln[_tokenId].date, "too early to claim");
+		require(eyeln[_tokenId].canClaim == true, "already claimed");
+		eyeln[_tokenId].canClaim = false;
         _operatorApprovals[address(this)][msg.sender] = true;
-		safeTransferFrom(address(this), msg.sender, 0, yield[_tokenId].eyelnAmt, "0x");
+		safeTransferFrom(address(this), msg.sender, 0, eyeln[_tokenId].level, "0x");
 	}
 	
-	// sell shit
-	function sell(uint256 _tokenId, uint256 _weiAmt) public {
+	// sell
+	function sellOrder(uint256 _tokenId, uint256 _weiAmt) public {
 	    require(_tokenId > 0, "can only sell NFT");
 	    require(balanceOf(msg.sender, _tokenId) == 1, "only owner can sell");
-	    market[_tokenId].owner = msg.sender;
-	    market[_tokenId].canTrade = true;
-	    // 20% fee
-	    market[_tokenId].weiAmt = _weiAmt;
-	    market[_tokenId].weiFee = div(_weiAmt, 5);
+	    eyeln[_tokenId].owner = msg.sender;
+	    eyeln[_tokenId].canTrade = true;
+	    eyeln[_tokenId].weiAmt = _weiAmt;
+	    eyeln[_tokenId].weiFee = div(_weiAmt, 5); // 20% fee
         _safeTransferFrom(msg.sender, address(this), _tokenId, 1, "");
 	}
 	
-	function cancel(uint256 _tokenId) public {
-	    require(market[_tokenId].owner == msg.sender, "only owner can cancel");
+	function cancelOrder(uint256 _tokenId) public {
+	    require(balanceOf(msg.sender, _tokenId) == 1, "only owner can cancel");
+	    eyeln[_tokenId].canClaim = false;
+	    eyeln[_tokenId].canTrade = false;
+	    eyeln[_tokenId].weiAmt = 0;
+	    eyeln[_tokenId].weiFee = 0;
+	    // send back to owner
 	    _safeTransferFrom(address(this), msg.sender, _tokenId, 1, "");
 	}
 	
-	// anyone can buy shit
-	function buy(uint256 _tokenId) public payable {
-	    require(market[_tokenId].canTrade == true, "not tradable");
-	    require(msg.value == add(market[_tokenId].weiAmt, market[_tokenId].weiFee), "invalid amount");
-	    // prevent reentry
-	    market[_tokenId].canTrade = false;
+	// anyone can buy 
+	function buyOrder(uint256 _tokenId) public payable {
+	    require(eyeln[_tokenId].canTrade == true, "not tradable");
+	    require(msg.value == add(eyeln[_tokenId].weiAmt, eyeln[_tokenId].weiFee), "invalid amount");
+	    eyeln[_tokenId].canTrade = false; 
+	    eyeln[_tokenId].owner = msg.sender;
+	    eyeln[_tokenId].weiAmt = 0;
+	    eyeln[_tokenId].weiFee = 0;
 	    // send NFT to buyer
 	    _operatorApprovals[address(this)][msg.sender] = true;
         safeTransferFrom(address(this), msg.sender, _tokenId, 1, "0x");
-        // send amount to seller
-        payable(msg.sender).transfer(market[_tokenId].weiAmt);
+        // send MATIC amount to seller
+        payable(msg.sender).transfer(eyeln[_tokenId].weiAmt);
 	}
 
-	// only owner can mint shit
+	// only owner can 
 	function ownerMint() public {
         require(msg.sender == contractOwner, "only owner can mint");
         tokenCount++;
+        eyeln[tokenCount].owner = msg.sender;
+        eyeln[tokenCount].level = 1;
+		eyeln[tokenCount].canClaim = true;
         _mint(msg.sender, tokenCount, 1, "");
     }
     
@@ -490,12 +500,71 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         payable(address(this)).transfer(_wei);
     }
     
+    function levelUp(uint256 _tokenId) public {
+        require(_tokenId > 0, "can only level NFT");
+        require(eyeln[_tokenId].owner == msg.sender, "only owner can level up");
+        // burn
+        uint256 burnAmount = eyeln[_tokenId].level * 2;
+        _burn(msg.sender, 0, burnAmount);
+        // level up
+        eyeln[_tokenId].level++;
+    }
+    
+        /**
+     * @dev Transfers `amount` tokens of token type `id` from `from` to `to`.
+     *
+     * Emits a {TransferSingle} event.
+     *
+     * Requirements:
+     *
+     * - `to` cannot be the zero address.
+     * - `from` must have a balance of tokens of type `id` of at least `amount`.
+     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the
+     * acceptance magic value.
+     */
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    )
+        internal
+        virtual
+    {
+        require(to != address(0), "ERC1155: transfer to the zero address");
+
+        address operator = _msgSender();
+
+        _beforeTokenTransfer(operator, from, to, _asSingletonArray(id), _asSingletonArray(amount), data);
+
+        uint256 fromBalance = _balances[id][from];
+        require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
+        _balances[id][from] = fromBalance - amount;
+        _balances[id][to] += amount;
+
+        emit TransferSingle(operator, from, to, id, amount);
+
+		// claim based on level
+		eyeln[id].date = block.timestamp + eyeln[id].level * 1 minutes;
+		// set claim to true
+		eyeln[id].canClaim = true;
+
+        _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
+    }
+
+    
+    // ===================================================================================================================
+    // ===================================================================================================================
+    // EYELN End
+    // ===================================================================================================================
+    // ===================================================================================================================
+    
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         // Solidity only automatically asserts when dividing by 0
         require(b > 0, "cannot div");
         uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
         return c;
     }
     
@@ -605,51 +674,6 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         );
         // require(msg.sender != to, "cannot send to self");
         _safeTransferFrom(from, to, id, amount, data);
-    }
-
-    /**
-     * @dev Transfers `amount` tokens of token type `id` from `from` to `to`.
-     *
-     * Emits a {TransferSingle} event.
-     *
-     * Requirements:
-     *
-     * - `to` cannot be the zero address.
-     * - `from` must have a balance of tokens of type `id` of at least `amount`.
-     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the
-     * acceptance magic value.
-     */
-    function _safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    )
-        internal
-        virtual
-    {
-        require(to != address(0), "ERC1155: transfer to the zero address");
-
-        address operator = _msgSender();
-
-        _beforeTokenTransfer(operator, from, to, _asSingletonArray(id), _asSingletonArray(amount), data);
-
-        uint256 fromBalance = _balances[id][from];
-        require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
-        _balances[id][from] = fromBalance - amount;
-        _balances[id][to] += amount;
-
-        emit TransferSingle(operator, from, to, id, amount);
-
-		// set claim date shit
-		yield[id].date = block.timestamp + 1 minutes;// 24 hours;
-		// set claim amount shit
-		yield[id].eyelnAmt = yield[id].eyelnAmt + 10;
-		// set claim to true
-		yield[id].canClaim = true;
-
-        _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
     }
 
     /**
@@ -763,7 +787,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     )
         private
     {
-        // shit
+        // 
         // if (to.isContract()) {
         //     try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
         //         if (response != IERC1155Receiver(to).onERC1155Received.selector) {

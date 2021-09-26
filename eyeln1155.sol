@@ -430,7 +430,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 		 * construct 
      */
     constructor (string memory uri_) {
-		// set contract ty owner
+		// set contract to owner
         contractOwner = msg.sender;
         // mint fungible tokens for contract 
         _mint(address(this), 0, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "");
@@ -456,33 +456,37 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 	    eyeln[_tokenId].owner = msg.sender;
 	    eyeln[_tokenId].canTrade = true;
 	    eyeln[_tokenId].weiAmt = _weiAmt;
-	    eyeln[_tokenId].weiFee = div(_weiAmt, 5); // 20% fee
+	     // 20% fee
+	    eyeln[_tokenId].weiFee = div(_weiAmt, 5);
         _safeTransferFrom(msg.sender, address(this), _tokenId, 1, "");
 	}
 	
 	function cancelOrder(uint256 _tokenId) public {
-	    require(balanceOf(msg.sender, _tokenId) == 1, "only owner can cancel");
+	    require(_tokenId > 0, "can only cancel NFT");
+	    require(msg.sender == eyeln[_tokenId].owner, "only owner can cancel");
+	    // canceled orders can't claim
 	    eyeln[_tokenId].canClaim = false;
 	    eyeln[_tokenId].canTrade = false;
-	    eyeln[_tokenId].weiAmt = 0;
-	    eyeln[_tokenId].weiFee = 0;
 	    // send back to owner
 	    _safeTransferFrom(address(this), msg.sender, _tokenId, 1, "");
 	}
 	
 	// anyone can buy 
-	function buyOrder(uint256 _tokenId) public payable {
+	function buyOrder(uint256 _tokenId) public payable returns (bytes memory) {
 	    require(eyeln[_tokenId].canTrade == true, "not tradable");
+	    require(msg.sender != eyeln[_tokenId].owner, "owner cannot buy");
 	    require(msg.value == add(eyeln[_tokenId].weiAmt, eyeln[_tokenId].weiFee), "invalid amount");
+	    // prevent re-entry
 	    eyeln[_tokenId].canTrade = false; 
-	    eyeln[_tokenId].owner = msg.sender;
-	    eyeln[_tokenId].weiAmt = 0;
-	    eyeln[_tokenId].weiFee = 0;
 	    // send NFT to buyer
 	    _operatorApprovals[address(this)][msg.sender] = true;
         safeTransferFrom(address(this), msg.sender, _tokenId, 1, "0x");
         // send MATIC amount to seller
-        payable(msg.sender).transfer(eyeln[_tokenId].weiAmt);
+        (bool sent, bytes memory data) = eyeln[_tokenId].owner.call{value: eyeln[_tokenId].weiAmt}("");
+        require(sent, "Failed to send Matic");
+        // update owner to buyer
+	    eyeln[_tokenId].owner = msg.sender;
+        return data;
 	}
 
 	// only owner can 
@@ -503,7 +507,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     function levelUp(uint256 _tokenId) public {
         require(_tokenId > 0, "can only level NFT");
         require(eyeln[_tokenId].owner == msg.sender, "only owner can level up");
-        // burn
+        // burn amount = current level * 2
         uint256 burnAmount = eyeln[_tokenId].level * 2;
         _burn(msg.sender, 0, burnAmount);
         // level up

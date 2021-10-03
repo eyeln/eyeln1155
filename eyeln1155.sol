@@ -409,13 +409,13 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     // ===================================================================================================================
     // ===================================================================================================================
 
-	// set contract owner n 
+    // set contract owner n 
     address private contractOwner;
-	// set counter to  0
+    // set counter to  0
     uint256 public tokenCount = 0;
-	// yield info 
-	struct Info {
-	    address owner;
+    // yield info 
+    struct Info {
+        address owner;
         bool canTrade;
         uint256 weiAmt;
         uint256 weiFee;
@@ -423,14 +423,14 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256 level;
         bool canClaim;
     }
-	// mapp yield info 
+    // mapp yield info 
     mapping(uint256 => Info) public eyeln;
     /**
      * @dev See {_setURI}.
 		 * construct 
      */
     constructor (string memory uri_) {
-		// set contract to owner
+        // set contract to owner
         contractOwner = msg.sender;
         // mint fungible tokens for contract 
         _mint(address(this), 0, 100000000000000000000000000, "");
@@ -438,64 +438,64 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         _setURI(uri_);
     }
 
-	// claim yield
-	function claimEyeln(uint256 _tokenId) public {
-	    require(_tokenId > 0, "can only claim NFT");
-	    require(balanceOf(msg.sender, _tokenId) == 1, "only owner can claim");
-		require(block.timestamp > eyeln[_tokenId].date, "too early to claim");
-		require(eyeln[_tokenId].canClaim == true, "already claimed");
-		eyeln[_tokenId].canClaim = false;
+    // claim yield
+    function claimEyeln(uint256 _tokenId) public {
+        require(_tokenId > 0, "can only claim NFT");
+        require(balanceOf(msg.sender, _tokenId) == 1, "only owner can claim");
+        require(block.timestamp > eyeln[_tokenId].date, "too early to claim");
+        require(eyeln[_tokenId].canClaim == true, "already claimed");
+        eyeln[_tokenId].canClaim = false;
         _operatorApprovals[address(this)][msg.sender] = true;
-		safeTransferFrom(address(this), msg.sender, 0, eyeln[_tokenId].level, "0x");
-	}
+        safeTransferFrom(address(this), msg.sender, 0, eyeln[_tokenId].level, "0x");
+    }
 	
-	// sell
-	function sellOrder(uint256 _tokenId, uint256 _weiAmt) public {
-	    require(_tokenId > 0, "can only sell NFT");
-	    require(balanceOf(msg.sender, _tokenId) == 1, "only owner can sell");
-	    eyeln[_tokenId].owner = msg.sender;
-	    eyeln[_tokenId].canTrade = true;
-	    eyeln[_tokenId].weiAmt = _weiAmt;
-	     // 20% fee
-	    eyeln[_tokenId].weiFee = div(_weiAmt, 5);
+    // sell
+    function sellOrder(uint256 _tokenId, uint256 _weiAmt) public {
+	require(_tokenId > 0, "can only sell NFT");
+        require(balanceOf(msg.sender, _tokenId) == 1, "only owner can sell");
+        eyeln[_tokenId].owner = msg.sender;
+        eyeln[_tokenId].canTrade = true;
+        eyeln[_tokenId].weiAmt = _weiAmt;
+        // 20% fee
+        eyeln[_tokenId].weiFee = div(_weiAmt, 5);
         _safeTransferFrom(msg.sender, address(this), _tokenId, 1, "");
-	}
+    }
 	
-	function cancelOrder(uint256 _tokenId) public {
-	    require(_tokenId > 0, "can only cancel NFT");
-	    require(msg.sender == eyeln[_tokenId].owner, "only owner can cancel");
-	    // canceled orders can't claim
-	    eyeln[_tokenId].canClaim = false;
-	    eyeln[_tokenId].canTrade = false;
-	    // send back to owner
-	    _safeTransferFrom(address(this), msg.sender, _tokenId, 1, "");
-	}
+    function cancelOrder(uint256 _tokenId) public {
+        require(_tokenId > 0, "can only cancel NFT");
+        require(msg.sender == eyeln[_tokenId].owner, "only owner can cancel");
+        // canceled orders can't claim
+        eyeln[_tokenId].canClaim = false;
+        eyeln[_tokenId].canTrade = false;
+        // send back to owner
+        _safeTransferFrom(address(this), msg.sender, _tokenId, 1, "");
+    }
 	
-	// anyone can buy 
-	function buyOrder(uint256 _tokenId) public payable returns (bytes memory) {
-	    require(eyeln[_tokenId].canTrade == true, "not tradable");
-	    require(msg.sender != eyeln[_tokenId].owner, "owner cannot buy");
-	    require(msg.value == add(eyeln[_tokenId].weiAmt, eyeln[_tokenId].weiFee), "invalid amount");
-	    // prevent re-entry
-	    eyeln[_tokenId].canTrade = false; 
-	    // send NFT to buyer
-	    _operatorApprovals[address(this)][msg.sender] = true;
+    // anyone can buy 
+    function buyOrder(uint256 _tokenId) public payable returns (bytes memory) {
+        require(eyeln[_tokenId].canTrade == true, "not tradable");
+        require(msg.sender != eyeln[_tokenId].owner, "owner cannot buy");
+        require(msg.value == add(eyeln[_tokenId].weiAmt, eyeln[_tokenId].weiFee), "invalid amount");
+        // prevent re-entry
+        eyeln[_tokenId].canTrade = false; 
+        // send NFT to buyer
+        _operatorApprovals[address(this)][msg.sender] = true;
         safeTransferFrom(address(this), msg.sender, _tokenId, 1, "0x");
         // send MATIC amount to seller
         (bool sent, bytes memory data) = eyeln[_tokenId].owner.call{value: eyeln[_tokenId].weiAmt}("");
         require(sent, "Failed to send Matic");
         // update owner to buyer
-	    eyeln[_tokenId].owner = msg.sender;
+	eyeln[_tokenId].owner = msg.sender;
         return data;
-	}
+    }
 
-	// only owner can 
-	function ownerMint() public {
+    // only owner can 
+    function ownerMint() public {
         require(msg.sender == contractOwner, "only owner can mint");
         tokenCount++;
         eyeln[tokenCount].owner = msg.sender;
         eyeln[tokenCount].level = 1;
-		eyeln[tokenCount].canClaim = true;
+        eyeln[tokenCount].canClaim = true;
         _mint(msg.sender, tokenCount, 1, "");
     }
     

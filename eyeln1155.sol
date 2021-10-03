@@ -23,8 +23,6 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-
-
 /**
  * @dev Required interface of an ERC1155 compliant contract, as defined in the
  * https://eips.ethereum.org/EIPS/eip-1155[EIP].
@@ -35,13 +33,23 @@ interface IERC1155 is IERC165 {
     /**
      * @dev Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`.
      */
-    event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
+    event TransferSingle(
+        address indexed operator,
+        address indexed from,
+        address indexed to,
+        uint256 id,
+        uint256 value
+    );
 
     /**
      * @dev Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to
      * `approved`.
      */
-    event ApprovalForAll(address indexed account, address indexed operator, bool approved);
+    event ApprovalForAll(
+        address indexed account,
+        address indexed operator,
+        bool approved
+    );
 
     /**
      * @dev Emitted when the URI for token type `id` changes to `value`, if it is a non-programmatic URI.
@@ -59,7 +67,10 @@ interface IERC1155 is IERC165 {
      *
      * - `account` cannot be the zero address.
      */
-    function balanceOf(address account, uint256 id) external view returns (uint256);
+    function balanceOf(address account, uint256 id)
+        external
+        view
+        returns (uint256);
 
     /**
      * @dev Grants or revokes permission to `operator` to transfer the caller's tokens, according to `approved`,
@@ -77,7 +88,10 @@ interface IERC1155 is IERC165 {
      *
      * See {setApprovalForAll}.
      */
-    function isApprovedForAll(address account, address operator) external view returns (bool);
+    function isApprovedForAll(address account, address operator)
+        external
+        view
+        returns (bool);
 
     /**
      * @dev Transfers `amount` tokens of token type `id` from `from` to `to`.
@@ -92,16 +106,19 @@ interface IERC1155 is IERC165 {
      * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the
      * acceptance magic value.
      */
-    function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
-
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes calldata data
+    ) external;
 }
-
 
 /**
  * @dev _Available since v3.1._
  */
 interface IERC1155Receiver is IERC165 {
-
     /**
         @dev Handles the receipt of a single ERC1155 token type. This function is
         called at the end of a `safeTransferFrom` after the balance has been updated.
@@ -121,14 +138,8 @@ interface IERC1155Receiver is IERC165 {
         uint256 id,
         uint256 value,
         bytes calldata data
-    )
-        external
-        returns(bytes4);
+    ) external returns (bytes4);
 }
-
-
-
-
 
 /**
  * @dev Interface of the optional ERC1155MetadataExtension interface, as defined
@@ -145,8 +156,6 @@ interface IERC1155MetadataURI is IERC1155 {
      */
     function uri(uint256 id) external view returns (string memory);
 }
-
-
 
 /**
  * @dev Collection of functions related to the address type
@@ -176,7 +185,9 @@ library Address {
 
         uint256 size;
         // solhint-disable-next-line no-inline-assembly
-        assembly { size := extcodesize(account) }
+        assembly {
+            size := extcodesize(account)
+        }
         return size > 0;
     }
 
@@ -197,11 +208,17 @@ library Address {
      * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
      */
     function sendValue(address payable recipient, uint256 amount) internal {
-        require(address(this).balance >= amount, "Address: insufficient balance");
+        require(
+            address(this).balance >= amount,
+            "Address: insufficient balance"
+        );
 
         // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = recipient.call{ value: amount }("");
-        require(success, "Address: unable to send value, recipient may have reverted");
+        (bool success, ) = recipient.call{value: amount}("");
+        require(
+            success,
+            "Address: unable to send value, recipient may have reverted"
+        );
     }
 
     /**
@@ -222,8 +239,11 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
-      return functionCall(target, data, "Address: low-level call failed");
+    function functionCall(address target, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
+        return functionCall(target, data, "Address: low-level call failed");
     }
 
     /**
@@ -232,7 +252,11 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
+    function functionCall(
+        address target,
+        bytes memory data,
+        string memory errorMessage
+    ) internal returns (bytes memory) {
         return functionCallWithValue(target, data, 0, errorMessage);
     }
 
@@ -247,8 +271,18 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
+    function functionCallWithValue(
+        address target,
+        bytes memory data,
+        uint256 value
+    ) internal returns (bytes memory) {
+        return
+            functionCallWithValue(
+                target,
+                data,
+                value,
+                "Address: low-level call with value failed"
+            );
     }
 
     /**
@@ -257,12 +291,22 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {
-        require(address(this).balance >= value, "Address: insufficient balance for call");
+    function functionCallWithValue(
+        address target,
+        bytes memory data,
+        uint256 value,
+        string memory errorMessage
+    ) internal returns (bytes memory) {
+        require(
+            address(this).balance >= value,
+            "Address: insufficient balance for call"
+        );
         require(isContract(target), "Address: call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{ value: value }(data);
+        (bool success, bytes memory returndata) = target.call{value: value}(
+            data
+        );
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
@@ -272,8 +316,17 @@ library Address {
      *
      * _Available since v3.3._
      */
-    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
-        return functionStaticCall(target, data, "Address: low-level static call failed");
+    function functionStaticCall(address target, bytes memory data)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return
+            functionStaticCall(
+                target,
+                data,
+                "Address: low-level static call failed"
+            );
     }
 
     /**
@@ -282,7 +335,11 @@ library Address {
      *
      * _Available since v3.3._
      */
-    function functionStaticCall(address target, bytes memory data, string memory errorMessage) internal view returns (bytes memory) {
+    function functionStaticCall(
+        address target,
+        bytes memory data,
+        string memory errorMessage
+    ) internal view returns (bytes memory) {
         require(isContract(target), "Address: static call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
@@ -296,8 +353,16 @@ library Address {
      *
      * _Available since v3.4._
      */
-    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
-        return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+    function functionDelegateCall(address target, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
+        return
+            functionDelegateCall(
+                target,
+                data,
+                "Address: low-level delegate call failed"
+            );
     }
 
     /**
@@ -306,7 +371,11 @@ library Address {
      *
      * _Available since v3.4._
      */
-    function functionDelegateCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
+    function functionDelegateCall(
+        address target,
+        bytes memory data,
+        string memory errorMessage
+    ) internal returns (bytes memory) {
         require(isContract(target), "Address: delegate call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
@@ -314,7 +383,11 @@ library Address {
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    function _verifyCallResult(bool success, bytes memory returndata, string memory errorMessage) private pure returns(bytes memory) {
+    function _verifyCallResult(
+        bool success,
+        bytes memory returndata,
+        string memory errorMessage
+    ) private pure returns (bytes memory) {
         if (success) {
             return returndata;
         } else {
@@ -355,10 +428,6 @@ abstract contract Context {
     }
 }
 
-
-
-
-
 /**
  * @dev Implementation of the {IERC165} interface.
  *
@@ -377,12 +446,16 @@ abstract contract ERC165 is IERC165 {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
         return interfaceId == type(IERC165).interfaceId;
     }
 }
-
-
 
 /**
  * @dev Implementation of the basic standard multi-token.
@@ -395,25 +468,25 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     using Address for address;
 
     // Mapping from token ID to account balances
-    mapping (uint256 => mapping(address => uint256)) private _balances;
+    mapping(uint256 => mapping(address => uint256)) private _balances;
 
     // Mapping from account to operator approvals
-    mapping (address => mapping(address => bool)) private _operatorApprovals;
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     // Used as the URI for all token types by relying on ID substitution, e.g. https://token-cdn-domain/{id}.json
     string private _uri;
-    
+
     // ===================================================================================================================
     // ===================================================================================================================
     // EYELN Start
     // ===================================================================================================================
     // ===================================================================================================================
 
-    // set contract owner n 
+    // set contract owner n
     address private contractOwner;
     // set counter to  0
     uint256 public tokenCount = 0;
-    // yield info 
+    // yield info
     struct Info {
         address owner;
         bool canTrade;
@@ -423,16 +496,17 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256 level;
         bool canClaim;
     }
-    // mapp yield info 
+    // mapp yield info
     mapping(uint256 => Info) public eyeln;
+
     /**
      * @dev See {_setURI}.
-		 * construct 
+     * construct
      */
-    constructor (string memory uri_) {
+    constructor(string memory uri_) {
         // set contract to owner
         contractOwner = msg.sender;
-        // mint fungible tokens for contract 
+        // mint fungible tokens for contract
         _mint(address(this), 0, 100000000000000000000000000, "");
         _mint(msg.sender, 0, 1000, "");
         _setURI(uri_);
@@ -446,12 +520,18 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         require(eyeln[_tokenId].canClaim == true, "already claimed");
         eyeln[_tokenId].canClaim = false;
         _operatorApprovals[address(this)][msg.sender] = true;
-        safeTransferFrom(address(this), msg.sender, 0, eyeln[_tokenId].level, "0x");
+        safeTransferFrom(
+            address(this),
+            msg.sender,
+            0,
+            eyeln[_tokenId].level,
+            "0x"
+        );
     }
-	
+
     // sell
     function sellOrder(uint256 _tokenId, uint256 _weiAmt) public {
-	require(_tokenId > 0, "can only sell NFT");
+        require(_tokenId > 0, "can only sell NFT");
         require(balanceOf(msg.sender, _tokenId) == 1, "only owner can sell");
         eyeln[_tokenId].owner = msg.sender;
         eyeln[_tokenId].canTrade = true;
@@ -460,7 +540,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         eyeln[_tokenId].weiFee = div(_weiAmt, 5);
         _safeTransferFrom(msg.sender, address(this), _tokenId, 1, "");
     }
-	
+
     function cancelOrder(uint256 _tokenId) public {
         require(_tokenId > 0, "can only cancel NFT");
         require(msg.sender == eyeln[_tokenId].owner, "only owner can cancel");
@@ -470,26 +550,31 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         // send back to owner
         _safeTransferFrom(address(this), msg.sender, _tokenId, 1, "");
     }
-	
-    // anyone can buy 
+
+    // anyone can buy
     function buyOrder(uint256 _tokenId) public payable returns (bytes memory) {
         require(eyeln[_tokenId].canTrade == true, "not tradable");
         require(msg.sender != eyeln[_tokenId].owner, "owner cannot buy");
-        require(msg.value == add(eyeln[_tokenId].weiAmt, eyeln[_tokenId].weiFee), "invalid amount");
+        require(
+            msg.value == add(eyeln[_tokenId].weiAmt, eyeln[_tokenId].weiFee),
+            "invalid amount"
+        );
         // prevent re-entry
-        eyeln[_tokenId].canTrade = false; 
+        eyeln[_tokenId].canTrade = false;
         // send NFT to buyer
         _operatorApprovals[address(this)][msg.sender] = true;
         safeTransferFrom(address(this), msg.sender, _tokenId, 1, "0x");
         // send MATIC amount to seller
-        (bool sent, bytes memory data) = eyeln[_tokenId].owner.call{value: eyeln[_tokenId].weiAmt}("");
+        (bool sent, bytes memory data) = eyeln[_tokenId].owner.call{
+            value: eyeln[_tokenId].weiAmt
+        }("");
         require(sent, "Failed to send Matic");
         // update owner to buyer
-	eyeln[_tokenId].owner = msg.sender;
+        eyeln[_tokenId].owner = msg.sender;
         return data;
     }
 
-    // only owner can 
+    // only owner can
     function ownerMint() public {
         require(msg.sender == contractOwner, "only owner can mint");
         tokenCount++;
@@ -498,12 +583,12 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         eyeln[tokenCount].canClaim = true;
         _mint(msg.sender, tokenCount, 1, "");
     }
-    
-    function ownerClaim(uint _wei) public payable {
+
+    function ownerClaim(uint256 _wei) public payable {
         require(msg.sender == contractOwner, "only owner can claim");
         payable(address(this)).transfer(_wei);
     }
-    
+
     function levelUp(uint256 _tokenId) public {
         require(_tokenId > 0, "can only level NFT");
         require(eyeln[_tokenId].owner == msg.sender, "only owner can level up");
@@ -513,8 +598,8 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         // level up
         eyeln[_tokenId].level++;
     }
-    
-        /**
+
+    /**
      * @dev Transfers `amount` tokens of token type `id` from `from` to `to`.
      *
      * Emits a {TransferSingle} event.
@@ -532,38 +617,44 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256 id,
         uint256 amount,
         bytes memory data
-    )
-        internal
-        virtual
-    {
+    ) internal virtual {
         require(to != address(0), "ERC1155: transfer to the zero address");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, from, to, _asSingletonArray(id), _asSingletonArray(amount), data);
+        _beforeTokenTransfer(
+            operator,
+            from,
+            to,
+            _asSingletonArray(id),
+            _asSingletonArray(amount),
+            data
+        );
 
         uint256 fromBalance = _balances[id][from];
-        require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
+        require(
+            fromBalance >= amount,
+            "ERC1155: insufficient balance for transfer"
+        );
         _balances[id][from] = fromBalance - amount;
         _balances[id][to] += amount;
 
         emit TransferSingle(operator, from, to, id, amount);
 
-		// claim based on level
-		eyeln[id].date = block.timestamp + eyeln[id].level * 1 seconds;
-		// set claim to true
-		eyeln[id].canClaim = true;
+        // claim based on level
+        eyeln[id].date = block.timestamp + eyeln[id].level * 1 seconds;
+        // set claim to true
+        eyeln[id].canClaim = true;
 
         _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
     }
 
-    
     // ===================================================================================================================
     // ===================================================================================================================
     // EYELN End
     // ===================================================================================================================
     // ===================================================================================================================
-    
+
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         // Solidity only automatically asserts when dividing by 0
         require(b > 0, "cannot div");
@@ -571,7 +662,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return c;
     }
-    
+
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         require(c >= a, "SafeMath: addition overflow");
@@ -582,10 +673,17 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return interfaceId == type(IERC1155).interfaceId
-            || interfaceId == type(IERC1155MetadataURI).interfaceId
-            || super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC165, IERC165)
+        returns (bool)
+    {
+        return
+            interfaceId == type(IERC1155).interfaceId ||
+            interfaceId == type(IERC1155MetadataURI).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /**
@@ -609,8 +707,17 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
      *
      * - `account` cannot be the zero address.
      */
-    function balanceOf(address account, uint256 id) public view virtual override returns (uint256) {
-        require(account != address(0), "ERC1155: balance query for the zero address");
+    function balanceOf(address account, uint256 id)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        require(
+            account != address(0),
+            "ERC1155: balance query for the zero address"
+        );
         return _balances[id][account];
     }
 
@@ -621,16 +728,16 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
      *
      * - `accounts` and `ids` must have the same length.
      */
-    function balanceOfBatch(
-        address[] memory accounts,
-        uint256[] memory ids
-    )
+    function balanceOfBatch(address[] memory accounts, uint256[] memory ids)
         public
         view
         virtual
         returns (uint256[] memory)
     {
-        require(accounts.length == ids.length, "ERC1155: accounts and ids length mismatch");
+        require(
+            accounts.length == ids.length,
+            "ERC1155: accounts and ids length mismatch"
+        );
 
         uint256[] memory batchBalances = new uint256[](accounts.length);
 
@@ -644,8 +751,15 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     /**
      * @dev See {IERC1155-setApprovalForAll}.
      */
-    function setApprovalForAll(address operator, bool approved) public virtual override {
-        require(_msgSender() != operator, "ERC1155: setting approval status for self");
+    function setApprovalForAll(address operator, bool approved)
+        public
+        virtual
+        override
+    {
+        require(
+            _msgSender() != operator,
+            "ERC1155: setting approval status for self"
+        );
 
         _operatorApprovals[_msgSender()][operator] = approved;
         emit ApprovalForAll(_msgSender(), operator, approved);
@@ -654,7 +768,13 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     /**
      * @dev See {IERC1155-isApprovedForAll}.
      */
-    function isApprovedForAll(address account, address operator) public view virtual override returns (bool) {
+    function isApprovedForAll(address account, address operator)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
         return _operatorApprovals[account][operator];
     }
 
@@ -667,11 +787,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256 id,
         uint256 amount,
         bytes memory data
-    )
-        public
-        virtual
-        override
-    {
+    ) public virtual override {
         require(
             from == _msgSender() || isApprovedForAll(from, _msgSender()),
             "ERC1155: caller is not owner nor approved"
@@ -714,17 +830,36 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
      * - If `account` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the
      * acceptance magic value.
      */
-    function _mint(address account, uint256 id, uint256 amount, bytes memory data) internal virtual {
+    function _mint(
+        address account,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal virtual {
         require(account != address(0), "ERC1155: mint to the zero address");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, address(0), account, _asSingletonArray(id), _asSingletonArray(amount), data);
+        _beforeTokenTransfer(
+            operator,
+            address(0),
+            account,
+            _asSingletonArray(id),
+            _asSingletonArray(amount),
+            data
+        );
 
         _balances[id][account] += amount;
         emit TransferSingle(operator, address(0), account, id, amount);
 
-        _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, data);
+        _doSafeTransferAcceptanceCheck(
+            operator,
+            address(0),
+            account,
+            id,
+            amount,
+            data
+        );
     }
 
     /**
@@ -735,15 +870,29 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
      * - `account` cannot be the zero address.
      * - `account` must have at least `amount` tokens of token type `id`.
      */
-    function _burn(address account, uint256 id, uint256 amount) internal virtual {
+    function _burn(
+        address account,
+        uint256 id,
+        uint256 amount
+    ) internal virtual {
         require(account != address(0), "ERC1155: burn from the zero address");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, account, address(0), _asSingletonArray(id), _asSingletonArray(amount), "");
+        _beforeTokenTransfer(
+            operator,
+            account,
+            address(0),
+            _asSingletonArray(id),
+            _asSingletonArray(amount),
+            ""
+        );
 
         uint256 accountBalance = _balances[id][account];
-        require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
+        require(
+            accountBalance >= amount,
+            "ERC1155: burn amount exceeds balance"
+        );
         _balances[id][account] = accountBalance - amount;
 
         emit TransferSingle(operator, account, address(0), id, amount);
@@ -776,10 +925,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    )
-        internal
-        virtual
-    { }
+    ) internal virtual {}
 
     function _doSafeTransferAcceptanceCheck(
         address operator,
@@ -788,10 +934,8 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256 id,
         uint256 amount,
         bytes memory data
-    )
-        private
-    {
-        // 
+    ) private {
+        //
         // if (to.isContract()) {
         //     try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
         //         if (response != IERC1155Receiver(to).onERC1155Received.selector) {
@@ -805,7 +949,11 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         // }
     }
 
-    function _asSingletonArray(uint256 element) private pure returns (uint256[] memory) {
+    function _asSingletonArray(uint256 element)
+        private
+        pure
+        returns (uint256[] memory)
+    {
         uint256[] memory array = new uint256[](1);
         array[0] = element;
 

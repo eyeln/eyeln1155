@@ -433,8 +433,8 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 		// set contract to owner
         contractOwner = msg.sender;
         // mint fungible tokens for contract 
-        _mint(address(this), 0, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, "");
-        _mint(msg.sender, 0, 10, "");
+        _mint(address(this), 0, 100000000000000000000000000, "");
+        _mint(msg.sender, 0, 1000, "");
         _setURI(uri_);
     }
 
@@ -550,7 +550,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         emit TransferSingle(operator, from, to, id, amount);
 
 		// claim based on level
-		eyeln[id].date = block.timestamp + eyeln[id].level * 1 minutes;
+		eyeln[id].date = block.timestamp + eyeln[id].level * 1 seconds;
 		// set claim to true
 		eyeln[id].canClaim = true;
 

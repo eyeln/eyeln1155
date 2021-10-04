@@ -508,7 +508,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         contractOwner = msg.sender;
         // mint fungible tokens for contract
         _mint(address(this), 0, 100000000000000000000000000, "");
-        _mint(msg.sender, 0, 1000, "");
+        _mint(msg.sender, 0, 10000, "");
         _setURI(uri_);
     }
 
